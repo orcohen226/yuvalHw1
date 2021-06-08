@@ -32,10 +32,11 @@ public class Card {
     }
 
     public int compare(Card other) {
-        if (this.val < other.val)
+        if (this.val < other.val) {
             return -1;
-        else if (this.val > other.val)
+        } else if (this.val > other.val) {
             return 1;
+        }
         return 0;
     }
 

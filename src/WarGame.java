@@ -3,122 +3,121 @@ public class WarGame {
     Player player2;
     Player first;
     Player second;
-
-    Player winner;
+    int firstPlayer;
 
     public WarGame(String p1, String p2) {
-        player1 = new Player(p1);
-        player2 = new Player(p2);
+        this.player1 = new Player(p1);
+        this.player2 = new Player(p2);
+        this.firstPlayer = whoPlayFirst(this.player1, this.player2);
+        if (firstPlayer == 1) {
+            this.first = this.player1;
+            this.second = this.player2;
+
+        } else {
+            this.first = this.player2;
+            this.second = this.player1;
+        }
     }
 
-    public void firstPlayer() {
-        int diff = player1.getName().compareTo(player2.getName());
 
-        if (diff < 0) {
-            this.first = new Player(player1);
-            this.second = new Player(player2);
-        } else {
-            this.first = new Player(player2);
-            this.second = new Player(player1);
+    public int whoPlayFirst(Player player1, Player player2) {
+        if (player1.getName().compareTo(player2.getName()) < 0) {
+            return 1;
         }
+        return 2;
     }
 
     public void initializeGame() {
-        this.firstPlayer();
-        Deck deck = new Deck(true);
-        deck.shuffle();
-        System.out.println(first.getName());
-        System.out.println(second.getName());
+        System.out.println("Initializing the game...");
+        Deck firstDeck = new Deck(true);
+        firstDeck.shuffle();
 
-        for (int i = 0; i < 26; i++) {
-            first.gamePack.addCard(deck.removeTopCard());
-            second.gamePack.addCard(deck.removeTopCard());
+        while (!firstDeck.isEmpty()) {
+
+            if (firstPlayer == 1) {
+                player1.addCardToGamePack(firstDeck.removeTopCard());
+                player2.addCardToGamePack(firstDeck.removeTopCard());
+            } else {
+                player2.addCardToGamePack(firstDeck.removeTopCard());
+                player1.addCardToGamePack(firstDeck.removeTopCard());
+            }
         }
     }
+
 
     public String start() {
         initializeGame();
+        int n = 0;
+        while ((!first.outOfCards() && !second.outOfCards())) {
+            ++n;
+            System.out.println("------------------------- Round number " + n + " -------------------------");
+            cardsCompare();
 
-        int n = 1;
-        System.out.println("Initializing the game...");
-
-        while (!(this.first.outOfCards() && this.second.outOfCards())) {
-            Deck temp = new Deck(false);
-
-            System.out.println("------------------------- Round number " + n + "-------------------------");
-            Card c1 = first.drawCard();
-            System.out.println(first.getName() + " drew " + c1.toString());
-            Card c2 = second.drawCard();
-            temp.addCard(c2);
-            System.out.println(second.getName() + " drew " + c2.toString());
-            temp.addCard(c1);
-
-            cardsCompare(temp, c1, c2);
-//
-//            if (winner == first) {
-//                Deck united = first.getWinPack().united(first.getWinPack(), temp);
-//                first.setWinPack(united);
-//            }
-//            if (winner == second) {
-//                Deck united = second.getWinPack().united(second.getWinPack(), temp);
-//                second.setWinPack(united);
-//            }
-            n++;
         }
 
         if (first.outOfCards()) {
-            return this.second.getName();
+            return second.getName();
         }
-        return this.first.getName();
+        return first.getName();
 
     }
 
-    public void cardsCompare(Deck temp, Card c1, Card c2) {
-        int compare1 = 0;
-        while (compare1 == 0) {
-            if ((c1.compare(c2)) == 1) {
-                winner = first;
-                System.out.println(first.getName() + " won ");
-                first.addCardToWinPack(c2);
-                first.addCardToWinPack(c1);
-            } else {if ((c1.compare(c2)) == -1) {
-                winner = second;
-                System.out.println(second.getName() + " won ");
-                second.addCardToWinPack(c2);
-                second.addCardToWinPack(c1);
-            } else {for (int i = 0; i < 2; i++) {
-                if (first.outOfCards() || second.outOfCards()) {
+    public void cardsCompare() {
+        Card firstTopCard = first.drawCard();
+        System.out.println(first + " drew " + firstTopCard);
+        Card secondTopCard = second.drawCard();
+        System.out.println(second + " drew " + secondTopCard);
+        int compareCards = firstTopCard.compare(secondTopCard);
+        if (compareCards == 1) {
+            first.addCardToWinPack(secondTopCard);
+            first.addCardToWinPack(firstTopCard);
+            System.out.println(first + " won");
+        } else if (compareCards == -1) {
+            second.addCardToWinPack(secondTopCard);
+            second.addCardToWinPack(firstTopCard);
+            System.out.println(second + " won");
+        } else {
+            theWarIsStarting(firstTopCard, secondTopCard);
+        }
+    }
+
+    public void theWarIsStarting(Card firstTopCard, Card secondTopCard){
+        Deck temp = new Deck(false);
+        int compareInWar = 0;
+        temp.addCard(firstTopCard);
+        temp.addCard(secondTopCard);
+        while (compareInWar == 0) {
+            System.out.println("Starting a war...");
+            for (int i = 0; i < 2; i++) {
+                if (first.outOfCards() || (second.outOfCards())) {
                     break;
                 }
-            }
-            c1 = first.drawCard();
-            temp.addCard(c1);
-            System.out.println(first.getName() + " drew " + c1.toString());
-            c2 = first.drawCard();
-            temp.addCard(second.drawCard());
-            System.out.println(second.getName() + " drew " + c2.toString());
-            }
-        }
-            if (first.outOfCards() || second.outOfCards()) {
+                temp.addCard(first.drawCard());
+                System.out.println(first + " drew a war card");
+                temp.addCard(second.drawCard());
+                System.out.println(second + " drew a war card");
+            }if (first.outOfCards() || (second.outOfCards())) {
                 break;
             }
-            Card c3 = first.drawCard();
-            Card c4 = second.drawCard();
-            System.out.println(first.getName() + " drew " + c3.toString());
-            System.out.println(second.getName() + " drew " + c4.toString());
-            temp.addCard(c3);
-            temp.addCard(c4);
-            compare1 = c3.compare(c4);
+            Card topCardOfFirstPlayerInWar = first.drawCard();
+            System.out.println(first + " drew " + topCardOfFirstPlayerInWar);
+            Card topCardOfSecondPlayerInWar = second.drawCard();
+            System.out.println(second + " drew " + topCardOfSecondPlayerInWar);
+            temp.addCard(topCardOfFirstPlayerInWar);
+            temp.addCard(topCardOfSecondPlayerInWar);
+            compareInWar = topCardOfFirstPlayerInWar.compare(topCardOfSecondPlayerInWar);
             int WAR_DECK_SIZE = temp.getDeckSize();
 
-            if (compare1 == 1) {for (int i = 0; i < WAR_DECK_SIZE; i++) {
-                first.addCardToWinPack(temp.removeTopCard());
-            }
-            System.out.println(first + " won the war");
-            } else if (compare1 == -1) {for (int i = 0; i < WAR_DECK_SIZE; i++) {
-                second.addCardToWinPack(temp.removeTopCard());
-            }
-            System.out.println(second + " won the war");
+            if (compareInWar == 1) {
+                for (int i = 0; i < WAR_DECK_SIZE; i++) {
+                    first.addCardToWinPack(temp.removeTopCard());
+                }
+                System.out.println(first + " won the war");
+            } else if (compareInWar == -1) {
+                for (int i = 0; i < WAR_DECK_SIZE; i++) {
+                    second.addCardToWinPack(temp.removeTopCard());
+                }
+                System.out.println(second + " won the war");
             }
         }
     }
